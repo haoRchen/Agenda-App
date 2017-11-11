@@ -1,4 +1,4 @@
-package com.example.harry.bthagenda;
+package com.example.a_one.agenda_app;
 
 import org.junit.Test;
 

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "953264915187",
+    "firebase_url": "https://agenda-haojafar.firebaseio.com",
+    "project_id": "agenda-haojafar",
+    "storage_bucket": "agenda-haojafar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953264915187:android:9161321e2b2fe9bf",
+        "android_client_info": {
+          "package_name": "com.example.a_one.agenda_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "953264915187-ee0grrr0s68gf327assjf3hsusdng9q6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo8jL63GGW4CIhiyZWqZmnCqpjpAwAT1c"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
