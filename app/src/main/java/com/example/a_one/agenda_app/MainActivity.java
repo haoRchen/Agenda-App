@@ -160,6 +160,8 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         if (id == R.id.action_logout) {
+            mFirebaseAuth.signOut();
+            LoadSignInView();
             return true;
         }
         return super.onOptionsItemSelected(item);
