@@ -1,13 +1,11 @@
 package com.example.a_one.agenda_app;
 
 import android.app.AlertDialog;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,11 +15,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.app.Fragment;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,24 +29,28 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity
-    implements NavigationView.OnNavigationItemSelectedListener {
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
-    private DatabaseReference mDatabase;
-    private String mUserId;
-
-
-
-    public MainActivity() {
-    }
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private FirebaseAuth firebaseAuthentication;
+    private FirebaseUser firebaseUser;
+    private DatabaseReference database;
+    private String userId;
+    private ArrayList<String> todoList;
+//    private ListView listView;
+//    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // #region Navigation drawer begin
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -59,9 +62,10 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        // #region Navigation drawer end
 
-        // Retrieve floating button for adding new todo list
-        FloatingActionButton addNewTodoButton = (FloatingActionButton)findViewById(R.id.addNewToDoButton);
+        // Retrieve floating button for adding new list
+        FloatingActionButton addNewTodoButton = (FloatingActionButton) findViewById(R.id.addNewToDoButton);
         addNewTodoButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 AddNewToDoItem();
@@ -69,31 +73,37 @@ public class MainActivity extends AppCompatActivity
         });
 
         // Initialize Firebase Auth and Database Reference
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseUser = mFirebaseAuth.getCurrentUser();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        firebaseAuthentication = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuthentication.getCurrentUser();
+        database = FirebaseDatabase.getInstance().getReference();
 
-        if (mFirebaseUser == null) {
-            // Not logged in, launch the Log In activity
+        if (firebaseUser == null) {
+            // User is not logged in, launch the Sign In activity
             LoadSignInView();
         } else {
-            mUserId = mFirebaseUser.getUid();
+            userId = firebaseUser.getUid();
 
             // Set up ListView
             final ListView listView = (ListView) findViewById(R.id.todo_list);
-            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
+            //final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
+            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
             listView.setAdapter(adapter);
 
             // Use Firebase to populate the list.
-            mDatabase.child("users").child(mUserId).child("items").addChildEventListener(new ChildEventListener() {
+            database.child("users").child(userId).child("items").addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    adapter.add((String) dataSnapshot.child("title").getValue());
+                    //adapter.add((String) dataSnapshot.child("title").getValue());
+                    todoList.add((String) dataSnapshot.child("title").getValue());
+                    adapter.notifyDataSetChanged();
                 }
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+//                    TextView tx = (TextView) listView.getItemAtPosition( adapter.getPosition(s));
+//                    tx.setText((String)dataSnapshot.child("title").getValue());
+//
+//                    adapter.notifyDataSetChanged();
                 }
 
                 @Override
@@ -111,26 +121,43 @@ public class MainActivity extends AppCompatActivity
 
                 }
             });
+
+            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    EditToDoItem((String) listView.getItemAtPosition(position), listView, position);
+                    return true;
+                }
+            });
+
+
+            // Delete items when clicked
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    database.child("users").child(userId).child("items")
+                            .orderByChild("title")
+                            .equalTo((String) listView.getItemAtPosition(position))
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.hasChildren()) {
+                                        DataSnapshot firstChild = dataSnapshot.getChildren().iterator().next();
+                                        firstChild.getRef().removeValue();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                }
+            });
+
+
         }
     }
 
-    public void AddNewToDoItem(){
-        final EditText taskEditText = new EditText(this);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("What will I do next?")
-                .setView(taskEditText)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mDatabase.child("users").child(mUserId).child("items").push().child("title").setValue(taskEditText.getText().toString());
-
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .create();
-        dialog.show();
-    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -160,7 +187,7 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         if (id == R.id.action_logout) {
-            mFirebaseAuth.signOut();
+            firebaseAuthentication.signOut();
             LoadSignInView();
             return true;
         }
@@ -181,10 +208,70 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    // Gets called when the user logs out or on app load.
     private void LoadSignInView() {
         Intent intent = new Intent(this, SignInActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
+
+    public void AddNewToDoItem() {
+        final EditText taskAddText = new EditText(this);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("What will I do next?")
+                .setView(taskAddText)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Store task into our database
+                        database.child("users").child(userId).child("items").push().child("title").setValue(taskAddText.getText().toString());
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
+    }
+
+    public void EditToDoItem(String taskMessage, final ListView listView, final int position) {
+        final EditText taskEditText = new EditText(this);
+        taskEditText.setText(taskMessage);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("What should I change the task to?")
+                .setView(taskEditText)
+                .setPositiveButton("Update Task", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        database.child("users").child(userId).child("items")
+                                .orderByChild("title")
+                                .equalTo((String) listView.getItemAtPosition(position))
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.hasChildren()) {
+                                            DataSnapshot firstChild = dataSnapshot.getChildren().iterator().next();
+                                            firstChild.child("title").getRef().setValue(taskEditText.getText().toString());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
+    }
+
+
+
+
+
+
 }

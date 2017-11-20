@@ -15,8 +15,6 @@
 
     </ListView>
 
-
-    <!--TODO: Change button name-->
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/addNewToDoButton"
         android:layout_width="wrap_content"

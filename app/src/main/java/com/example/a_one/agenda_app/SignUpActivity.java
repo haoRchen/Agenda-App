@@ -18,7 +18,7 @@ public class SignUpActivity extends AppCompatActivity {
     protected EditText passwordEditText;
     protected EditText emailEditText;
     protected Button signUpButton;
-    private FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth firebaseAuthentication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,20 +26,17 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         // Initialize FirebaseAuth
-        mFirebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuthentication = FirebaseAuth.getInstance();
 
-        passwordEditText = (EditText)findViewById(R.id.passwordField);
-        emailEditText = (EditText)findViewById(R.id.emailField);
+        passwordEditText = (EditText)findViewById(R.id.passwordInputField);
+        emailEditText = (EditText)findViewById(R.id.emailInputField);
         signUpButton = (Button)findViewById(R.id.signupButton);
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String password = passwordEditText.getText().toString();
-                String email = emailEditText.getText().toString();
-
-                password = password.trim();
-                email = email.trim();
+                String password = passwordEditText.getText().toString().trim();
+                String email = emailEditText.getText().toString().trim();
 
                 if (password.isEmpty() || email.isEmpty()) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
@@ -49,17 +46,18 @@ public class SignUpActivity extends AppCompatActivity {
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 } else {
-                    mFirebaseAuth.createUserWithEmailAndPassword(email, password)
+                    // There is something for us to process from email/password text fields.
+                    firebaseAuthentication.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
-                                        // TODO: redirect to agenda view
                                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         startActivity(intent);
                                     } else {
+                                        // Something went wrong, display the error message from firebase.
                                         AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
                                         builder.setMessage(task.getException().getMessage())
                                                 .setTitle(R.string.login_error_title)

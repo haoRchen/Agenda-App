@@ -20,7 +20,7 @@ public class SignInActivity extends AppCompatActivity {
     protected EditText passwordEditText;
     protected Button logInButton;
     protected TextView signUpTextView;
-    private FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,13 +28,14 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         // Initialize FirebaseAuth
-        mFirebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
 
         signUpTextView = (TextView) findViewById(R.id.signUpText);
-        emailEditText = (EditText) findViewById(R.id.emailField);
-        passwordEditText = (EditText) findViewById(R.id.passwordField);
+        emailEditText = (EditText) findViewById(R.id.emailInputField);
+        passwordEditText = (EditText) findViewById(R.id.passwordInputField);
         logInButton = (Button) findViewById(R.id.loginButton);
 
+        // sign up button listener to register.
         signUpTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,11 +47,8 @@ public class SignInActivity extends AppCompatActivity {
         logInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = emailEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
-
-                email = email.trim();
-                password = password.trim();
+                String email = emailEditText.getText().toString().trim();
+                String password = passwordEditText.getText().toString().trim();
 
                 if (email.isEmpty() || password.isEmpty()) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SignInActivity.this);
@@ -60,26 +58,27 @@ public class SignInActivity extends AppCompatActivity {
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 } else {
-                    mFirebaseAuth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    if (task.isSuccessful()) {
-                                        // TODO: send user to calendar fragment.
-                                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(intent);
-                                    } else {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(SignInActivity.this);
-                                        builder.setMessage(task.getException().getMessage())
-                                                .setTitle(R.string.login_error_title)
-                                                .setPositiveButton(android.R.string.ok, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
-                                    }
+                    // There is something for us to process from email/password text fields.
+                    firebaseAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                } else {
+                                    // Something went wrong, display the error message from firebase.
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(SignInActivity.this);
+                                    builder.setMessage(task.getException().getMessage())
+                                            .setTitle(R.string.login_error_title)
+                                            .setPositiveButton(android.R.string.ok, null);
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
                                 }
-                            });
+                            }
+                        });
                 }
             }
         });

@@ -10,7 +10,7 @@
     tools:context=".SignUpActivity" >
 
     <EditText
-        android:id="@+id/emailField"
+        android:id="@+id/emailInputField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -23,11 +23,11 @@
     </EditText>
 
     <EditText
-        android:id="@+id/passwordField"
+        android:id="@+id/passwordInputField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/emailField"
-        android:layout_below="@+id/emailField"
+        android:layout_alignLeft="@+id/emailInputField"
+        android:layout_below="@+id/emailInputField"
         android:ems="10"
         android:hint="@string/password_hint"
         android:inputType="textPassword" />
@@ -36,8 +36,8 @@
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/passwordField"
-        android:layout_below="@+id/passwordField"
+        android:layout_alignLeft="@+id/passwordInputField"
+        android:layout_below="@+id/passwordInputField"
         android:text="@string/login_button_label" />
 
     <TextView
