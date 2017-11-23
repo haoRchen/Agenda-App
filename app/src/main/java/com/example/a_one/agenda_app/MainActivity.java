@@ -85,17 +85,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Set up ListView
             final ListView listView = (ListView) findViewById(R.id.todo_list);
-            //final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
-            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
+            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
+//            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
             listView.setAdapter(adapter);
 
             // Use Firebase to populate the list.
             database.child("users").child(userId).child("items").addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    //adapter.add((String) dataSnapshot.child("title").getValue());
-                    todoList.add((String) dataSnapshot.child("title").getValue());
-                    adapter.notifyDataSetChanged();
+                    adapter.add((String) dataSnapshot.child("title").getValue());
+//                    todoList.add((String) dataSnapshot.child("title").getValue());
+//                    adapter.notifyDataSetChanged();
                 }
 
                 @Override
