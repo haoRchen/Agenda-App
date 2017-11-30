@@ -68,7 +68,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FloatingActionButton addNewTodoButton = (FloatingActionButton) findViewById(R.id.addNewToDoButton);
         addNewTodoButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                AddNewToDoItem();
+
+                //AddNewToDoItem();
+                Intent intent = new Intent(getBaseContext(), AddTaskAcitivity.class);
+                startActivity(intent);
             }
         });
 
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Set up ListView
             final ListView listView = (ListView) findViewById(R.id.todo_list);
             final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
-//            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
+            //final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
             listView.setAdapter(adapter);
 
             // Use Firebase to populate the list.
@@ -94,8 +97,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     adapter.add((String) dataSnapshot.child("title").getValue());
-//                    todoList.add((String) dataSnapshot.child("title").getValue());
-//                    adapter.notifyDataSetChanged();
+                    //todoList.add((String) dataSnapshot.child("title").getValue());
+                    adapter.notifyDataSetChanged();
                 }
 
                 @Override
@@ -125,7 +128,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    EditToDoItem((String) listView.getItemAtPosition(position), listView, position);
+                    Intent intent = new Intent(getBaseContext(), AddTaskAcitivity.class);
+                    startActivity(intent);
+                    //EditToDoItem((String) listView.getItemAtPosition(position), listView, position);
                     return true;
                 }
             });
@@ -217,23 +222,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
     }
 
-    public void AddNewToDoItem() {
-        final EditText taskAddText = new EditText(this);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("What will I do next?")
-                .setView(taskAddText)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Store task into our database
-                        database.child("users").child(userId).child("items").push().child("title").setValue(taskAddText.getText().toString());
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .create();
-        dialog.show();
-    }
+//    public void AddNewToDoItem() {
+//        final EditText taskAddText = new EditText(this);
+//
+//        AlertDialog dialog = new AlertDialog.Builder(this)
+//                .setTitle("What will I do next?")
+//                .setView(taskAddText)
+//                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        // Store task into our database
+//                        database.child("users").child(userId).child("items").push().child("title").setValue(taskAddText.getText().toString());
+//                    }
+//                })
+//                .setNegativeButton("Cancel", null)
+//                .create();
+//        dialog.show();
+//    }
 
     public void EditToDoItem(String taskMessage, final ListView listView, final int position) {
         final EditText taskEditText = new EditText(this);

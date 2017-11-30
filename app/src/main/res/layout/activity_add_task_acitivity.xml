@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.a_one.agenda_app.AddTaskAcitivity">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add New Task"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <EditText
+        android:id="@+id/messageInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView2"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="11dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Task " />
+
+    <Spinner
+        android:id="@+id/priority_options"
+        android:layout_width="350px"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/messageInput"
+        android:layout_below="@+id/messageInput"
+        android:layout_marginTop="37dp"
+        android:entries="@array/priority_array"/>
+
+    <Button
+        android:id="@+id/submit_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/priority_options"
+        android:layout_below="@+id/priority_options"
+        android:layout_marginEnd="23dp"
+        android:layout_marginTop="12dp"
+        android:text="Add New Task!" />
+
+
+</RelativeLayout>
