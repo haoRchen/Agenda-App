@@ -13,7 +13,7 @@ public class Task {
     private String task_id;
     private String message;
     private String date;
-    private int priority;
+    private String priority;
 
     public Task() {
 
@@ -42,11 +42,11 @@ public class Task {
         this.task_id = task_id;
     }
 
-    public int getPriority() {
+    public String getPriority() {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(String priority) {
         this.priority = priority;
     }
 
@@ -56,7 +56,7 @@ public class Task {
         task.put("task_id", task_id);
         task.put("message", message);
         task.put("date", date);
-        task.put("priority", String.valueOf(priority));
+        task.put("priority",priority);
 
         return task;
     }

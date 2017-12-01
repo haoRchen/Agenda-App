@@ -5,7 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.a_one.agenda_app.models.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -43,8 +48,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DatabaseReference database;
     private String userId;
     private ArrayList<String> todoList;
-//    private ListView listView;
-//    private ArrayAdapter<String> adapter;
+
+    RecycleAdapter adapter;
+    ArrayList<Task> taskList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,17 +70,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         // #region Navigation drawer end
 
-        // Retrieve floating button for adding new list
+        // Retrieve floating button for adding new task
         FloatingActionButton addNewTodoButton = (FloatingActionButton) findViewById(R.id.addNewToDoButton);
         addNewTodoButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                //AddNewToDoItem();
+                //Send the user to a new Activity to add a task
                 Intent intent = new Intent(getBaseContext(), AddTaskAcitivity.class);
                 startActivity(intent);
             }
         });
+        taskList = new ArrayList<>();
+        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.task_list);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(llm);
+        adapter = new RecycleAdapter();
+        recyclerView.setAdapter(adapter);
 
+        adapter.notifyDataSetChanged();
         // Initialize Firebase Auth and Database Reference
         firebaseAuthentication = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuthentication.getCurrentUser();
@@ -85,79 +98,79 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             LoadSignInView();
         } else {
             userId = firebaseUser.getUid();
-
-            // Set up ListView
-            final ListView listView = (ListView) findViewById(R.id.todo_list);
-            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
-            //final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
-            listView.setAdapter(adapter);
-
-            // Use Firebase to populate the list.
-            database.child("users").child(userId).child("items").addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    adapter.add((String) dataSnapshot.child("title").getValue());
-                    //todoList.add((String) dataSnapshot.child("title").getValue());
-                    adapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//                    TextView tx = (TextView) listView.getItemAtPosition( adapter.getPosition(s));
-//                    tx.setText((String)dataSnapshot.child("title").getValue());
 //
+//            // Set up ListView
+//            final ListView listView = (ListView) findViewById(R.id.todo_list);
+//            final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
+//            //final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
+//            listView.setAdapter(adapter);
+//
+//            // Use Firebase to populate the list.
+//            database.child("users").child(userId).child("items").addChildEventListener(new ChildEventListener() {
+//                @Override
+//                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                    adapter.add((String) dataSnapshot.child("title").getValue());
+//                    //todoList.add((String) dataSnapshot.child("title").getValue());
 //                    adapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    adapter.remove((String) dataSnapshot.child("title").getValue());
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    Intent intent = new Intent(getBaseContext(), AddTaskAcitivity.class);
-                    startActivity(intent);
-                    //EditToDoItem((String) listView.getItemAtPosition(position), listView, position);
-                    return true;
-                }
-            });
-
-
-            // Delete items when clicked
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    database.child("users").child(userId).child("items")
-                            .orderByChild("title")
-                            .equalTo((String) listView.getItemAtPosition(position))
-                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.hasChildren()) {
-                                        DataSnapshot firstChild = dataSnapshot.getChildren().iterator().next();
-                                        firstChild.getRef().removeValue();
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-                }
-            });
+//                }
+//
+//                @Override
+//                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+////                    TextView tx = (TextView) listView.getItemAtPosition( adapter.getPosition(s));
+////                    tx.setText((String)dataSnapshot.child("title").getValue());
+////
+////                    adapter.notifyDataSetChanged();
+//                }
+//
+//                @Override
+//                public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                    adapter.remove((String) dataSnapshot.child("title").getValue());
+//                }
+//
+//                @Override
+//                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+//
+//            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//                @Override
+//                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+//                    Intent intent = new Intent(getBaseContext(), AddTaskAcitivity.class);
+//                    startActivity(intent);
+//                    //EditToDoItem((String) listView.getItemAtPosition(position), listView, position);
+//                    return true;
+//                }
+//            });
+//
+//
+//            // Delete items when clicked
+//            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                    database.child("users").child(userId).child("items")
+//                            .orderByChild("title")
+//                            .equalTo((String) listView.getItemAtPosition(position))
+//                            .addListenerForSingleValueEvent(new ValueEventListener() {
+//                                @Override
+//                                public void onDataChange(DataSnapshot dataSnapshot) {
+//                                    if (dataSnapshot.hasChildren()) {
+//                                        DataSnapshot firstChild = dataSnapshot.getChildren().iterator().next();
+//                                        firstChild.getRef().removeValue();
+//                                    }
+//                                }
+//
+//                                @Override
+//                                public void onCancelled(DatabaseError databaseError) {
+//
+//                                }
+//                            });
+//                }
+//            });
 
 
         }
@@ -275,6 +288,71 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        database.child("users").child(userId).child("taskList").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        taskList.clear();
+
+                        Log.w("AgendaApp", "getUser:onCancelled " + dataSnapshot.toString());
+                        Log.w("AgendaApp", "count = " + String.valueOf(dataSnapshot.getChildrenCount()) + " values " + dataSnapshot.getKey());
+                        for (DataSnapshot data : dataSnapshot.getChildren()) {
+                            Task task = data.getValue(Task.class);
+                            taskList.add(task);
+                        }
+
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w("AgendaApp", "getUser:onCancelled", databaseError.toException());
+                    }
+                });
+    }
+
+    private class RecycleAdapter extends RecyclerView.Adapter {
+
+
+        @Override
+        public int getItemCount() {
+            return taskList.size();
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false);
+            SimpleItemViewHolder pvh = new SimpleItemViewHolder(v);
+            return pvh;
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            SimpleItemViewHolder viewHolder = (SimpleItemViewHolder) holder;
+            viewHolder.position = position;
+            Task task = taskList.get(position);
+            ((SimpleItemViewHolder) holder).message.setText(task.getMessage());
+        }
+
+        public final  class SimpleItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            TextView message;
+            public int position;
+            public SimpleItemViewHolder(View itemView) {
+                super(itemView);
+                itemView.setOnClickListener(this);
+                message = (TextView) itemView.findViewById(R.id.task_message);
+            }
+
+            @Override
+            public void onClick(View view) {
+
+            }
+        }
+    }
 
 
 
