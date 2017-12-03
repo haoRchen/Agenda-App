@@ -5,9 +5,13 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/agenda"
+            android:id="@+id/currentAgenda"
             android:icon="@android:drawable/ic_menu_agenda"
-            android:title="Agenda" />
+            android:title="Current Agenda" />
+        <item
+            android:id="@+id/calendar"
+            android:icon="@android:drawable/ic_menu_my_calendar"
+            android:title="Calendar" />
     </group>
 
     <item android:title="Communicate">

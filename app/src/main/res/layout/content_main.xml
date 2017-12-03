@@ -15,6 +15,14 @@
 
     <!--</ListView>-->
 
+    <TextView
+        android:id="@+id/currentDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="TextView" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/addNewToDoButton"
         android:layout_width="wrap_content"
@@ -32,6 +40,8 @@
         android:id="@+id/task_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/currentDate"
         android:scrollbars="vertical" />
 
 </RelativeLayout>

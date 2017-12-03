@@ -3,15 +3,21 @@ package com.example.a_one.agenda_app;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.a_one.agenda_app.models.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class EditTaskActivtiy extends AppCompatActivity {
 
@@ -21,8 +27,8 @@ public class EditTaskActivtiy extends AppCompatActivity {
         setContentView(R.layout.activity_edit_task_activtiy);
 
 
-        TextView editText = (TextView) findViewById(R.id.editMessage);
-        Spinner editPriority = (Spinner) findViewById(R.id.editPriority);
+        final EditText editText = (EditText) findViewById(R.id.editMessage);
+        final Spinner editPriority = (Spinner) findViewById(R.id.editPriority);
         Button confirmChange = (Button) findViewById(R.id.editButton);
 
         FirebaseAuth firebaseAuthentication = FirebaseAuth.getInstance();
@@ -30,21 +36,30 @@ public class EditTaskActivtiy extends AppCompatActivity {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String userId = firebaseUser.getUid();
 
-        String key  = getIntent().getStringExtra("taskID");
+        final String key  = getIntent().getStringExtra("taskID");
 
-        DatabaseReference task = database.child("users").child(userId).child("taskList").child(key);
+        final DatabaseReference taskToEdit = database.child("users").child(userId).child("taskList").child(key);
+        taskToEdit.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Task task = dataSnapshot.getValue(Task.class);
+                editText.setText(task.getMessage());
+                editPriority.setSelection(getIndex(editPriority, task.getPriority()));
+            }
 
-        editText.setText((task.child("message").toString()));
-        editPriority.setSelection(getIndex(editPriority, task.child("priority").toString()));
-
-
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("AgendaApp", "getUser:onCancelled", databaseError.toException());
+            }
+        });
 
         confirmChange.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                //Send the user to a new Activity to add a task
-                Intent intent = new Intent(getBaseContext(), AddTaskAcitivity.class);
-                startActivity(intent);
+                Task editedTask = new Task(key, editText.getText().toString(), editPriority.getSelectedItem().toString());
+                taskToEdit.setValue(editedTask);
+                finish();
             }
         });
 

@@ -43,7 +43,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 
@@ -78,6 +81,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Navigation drawer end ***********************************
 
         // Variable declaration begin ***********************************
+
+        TextView dateText = (TextView)findViewById(R.id.currentDate);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cal = Calendar.getInstance();
+        Date now = cal.getTime(); // set the current datetime in a Date-object
+        // SimpleDateFormat.format( Date date ) returns a formatted string
+        // with the predefined format
+        String timeString = sdf.format( now ); // contains yyyy-MM-dd (e.g. 2012-03-15 for March 15, 2012)
+        dateText.setText( timeString );
+
+
         taskList = new ArrayList<>();
         final RecyclerView recyclerView = (RecyclerView)findViewById(R.id.task_list);
         LinearLayoutManager llm = new LinearLayoutManager(this);
@@ -239,7 +253,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.agenda) {
+        if (id == R.id.currentAgenda) {
+            finish();
+        }
+        if (id == R.id.calendar) {
 
         }
 
