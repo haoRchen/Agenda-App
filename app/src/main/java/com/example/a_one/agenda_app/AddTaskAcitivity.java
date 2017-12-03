@@ -42,7 +42,7 @@ public class AddTaskAcitivity extends AppCompatActivity {
 
                 // Populate the model task with user input.
                 Task task = new Task();
-                task.setTask_id(key);
+                task.setTask_id(key); // Use the generated key from the database as id.
                 task.setMessage(editText.getText().toString());
                 String rating = spinner.getSelectedItem().toString();
                 task.setPriority(rating);

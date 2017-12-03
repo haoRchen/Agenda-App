@@ -85,7 +85,62 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         adapter = new RecycleAdapter();
         recyclerView.setAdapter(adapter);
 
+        // Initialize Firebase Auth and Database Reference
+        firebaseAuthentication = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuthentication.getCurrentUser();
+        database = FirebaseDatabase.getInstance().getReference();
+
         // Variable declaration End ***********************************
+
+
+
+        if (firebaseUser == null) {
+            // User is not logged in, launch the Sign In activity
+            LoadSignInView();
+        } else {
+            userId = firebaseUser.getUid();
+
+//            // Use Firebase to populate the list.
+            database.child("users").child(userId).child("taskList").addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String original) {
+                    Toast.makeText(MainActivity.this, "A task has been added in the database!",
+                            Toast.LENGTH_SHORT).show();
+//                    taskList.add(dataSnapshot.getValue(Task.class));
+//                    adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String original) {
+//                    TextView tx = (TextView) listView.getItemAtPosition( adapter.getPosition(s));
+//                    tx.setText((String)dataSnapshot.child("title").getValue());
+
+                    Toast.makeText(MainActivity.this, "A task has changed in the database!",
+                            Toast.LENGTH_SHORT).show();
+                    UpdateTaskList();
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    Toast.makeText(MainActivity.this, "A task has been removed from the database!",
+                            Toast.LENGTH_SHORT).show();
+                    UpdateTaskList();
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String original) {
+                    Toast.makeText(MainActivity.this, "A task has been moved in the database!",
+                            Toast.LENGTH_SHORT).show();
+                    UpdateTaskList();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
 
 
         // Retrieve floating button for adding new task
@@ -109,10 +164,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "Single Click on position        :"+position,
                         Toast.LENGTH_SHORT).show();
 
+                // When the close button is pressed, delete the item.
                 ImageButton deleteButton = (ImageButton)view.findViewById(R.id.closeTask);
                 deleteButton.setOnClickListener(new View.OnClickListener() {
 
-                Task taskClicked = taskList.get(position);
+                    Task taskClicked = taskList.get(position);
                     @Override
                     public void onClick(View v) {
 
@@ -128,64 +184,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onLongClick(View view, int position) {
                 Toast.makeText(MainActivity.this, "Long press on position :"+position,
                         Toast.LENGTH_LONG).show();
+
+                // Send users to a new activity to handle
+                Intent intent = new Intent(getBaseContext(), EditTaskActivtiy.class);
+                Task taskClicked = taskList.get(position);
+                intent.putExtra("taskID", taskClicked.getTask_id());
+                startActivity(intent);
             }
 
         }));
 
-        // Initialize Firebase Auth and Database Reference
-        firebaseAuthentication = FirebaseAuth.getInstance();
-        firebaseUser = firebaseAuthentication.getCurrentUser();
-        database = FirebaseDatabase.getInstance().getReference();
-
-        if (firebaseUser == null) {
-            // User is not logged in, launch the Sign In activity
-            LoadSignInView();
-        } else {
-            userId = firebaseUser.getUid();
-
-//            // Use Firebase to populate the list.
-            database.child("users").child(userId).child("taskList").addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String original) {
-                    Toast.makeText(MainActivity.this, "A task has been added in the database!",
-                            Toast.LENGTH_SHORT).show();
-                    taskList.add(dataSnapshot.getValue(Task.class));
-                    adapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String original) {
-//                    TextView tx = (TextView) listView.getItemAtPosition( adapter.getPosition(s));
-//                    tx.setText((String)dataSnapshot.child("title").getValue());
-
-                    Toast.makeText(MainActivity.this, "A task has changed in the database!",
-                            Toast.LENGTH_SHORT).show();
-                    UpdateTaskList();
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-//                    adapter.remove((String) dataSnapshot.child("title").getValue());
-                    Toast.makeText(MainActivity.this, "A task has been removed from the database!",
-                            Toast.LENGTH_SHORT).show();
-                    UpdateTaskList();
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String original) {
-                    Toast.makeText(MainActivity.this, "A task has been moved in the database!",
-                            Toast.LENGTH_SHORT).show();
-                    UpdateTaskList();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
     }
+
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -280,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    // This gets called whenever a tasklist data changes.
     public void UpdateTaskList(){
         database.child("users").child(userId).child("taskList").addListenerForSingleValueEvent(
                 new ValueEventListener() {
