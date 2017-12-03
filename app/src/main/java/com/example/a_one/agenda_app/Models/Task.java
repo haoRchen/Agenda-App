@@ -18,6 +18,12 @@ public class Task {
     public Task() {
 
     }
+    public Task(String id, String msg, String priority_) {
+        task_id = id;
+        message = msg;
+        priority = priority_;
+    }
+
     public String getDate() {
         return date;
     }
