@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirebaseAuth firebaseAuthentication;
     private FirebaseUser firebaseUser;
     private DatabaseReference database;
+    private TextView dateText;
     private String userId;
 
     RecycleAdapter adapter;
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Variable declaration begin ***********************************
 
-        TextView dateText = (TextView)findViewById(R.id.currentDate);
+        dateText = (TextView)findViewById(R.id.currentDate);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         Date now = cal.getTime(); // set the current datetime in a Date-object
@@ -106,8 +107,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Variable declaration End ***********************************
 
-
-
         if (firebaseUser == null) {
             // User is not logged in, launch the Sign In activity
             LoadSignInView();
@@ -120,14 +119,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public void onChildAdded(DataSnapshot dataSnapshot, String original) {
                     Toast.makeText(MainActivity.this, "A task has been added in the database!",
                             Toast.LENGTH_SHORT).show();
-//                    taskList.add(dataSnapshot.getValue(Task.class));
-//                    adapter.notifyDataSetChanged();
                 }
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String original) {
-//                    TextView tx = (TextView) listView.getItemAtPosition( adapter.getPosition(s));
-//                    tx.setText((String)dataSnapshot.child("title").getValue());
 
                     Toast.makeText(MainActivity.this, "A task has changed in the database!",
                             Toast.LENGTH_SHORT).show();
@@ -236,7 +231,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_email) {
+            SendTasksToEmail();
             return true;
         }
         if (id == R.id.action_logout) {
@@ -247,6 +243,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
+    public void SendTasksToEmail(){
+        String emailBody = "Your tasks for: " + dateText.getText()+ System.lineSeparator();
+        for (int i = 0; i < taskList.size(); i++)
+        {
+            emailBody += i+1 + " - " + taskList.get(i).getMessage() + System.lineSeparator();
+        }
+
+        //Start email intent with body all set.
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/html");
+        intent.putExtra(Intent.EXTRA_EMAIL, "emailaddress@emailaddress.com");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
+        intent.putExtra(Intent.EXTRA_TEXT, ""+emailBody);
+
+        startActivity(Intent.createChooser(intent, "Send Email"));
+    }
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -272,41 +284,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
-
-    public void EditToDoItem(String taskMessage, final ListView listView, final int position) {
-        final EditText taskEditText = new EditText(this);
-        taskEditText.setText(taskMessage);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("What should I change the task to?")
-                .setView(taskEditText)
-                .setPositiveButton("Update Task", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        database.child("users").child(userId).child("items")
-                                .orderByChild("title")
-                                .equalTo((String) listView.getItemAtPosition(position))
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if (dataSnapshot.hasChildren()) {
-                                            DataSnapshot firstChild = dataSnapshot.getChildren().iterator().next();
-                                            firstChild.child("title").getRef().setValue(taskEditText.getText().toString());
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .create();
-        dialog.show();
-    }
-
 
     // This gets called whenever a tasklist data changes.
     public void UpdateTaskList(){

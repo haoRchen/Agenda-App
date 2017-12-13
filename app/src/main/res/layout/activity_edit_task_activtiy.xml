@@ -10,9 +10,9 @@
         android:id="@+id/editMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/textView4"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="41dp"
+        android:layout_marginTop="54dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Message" />
@@ -21,8 +21,9 @@
         android:id="@+id/editPriority"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/editButton"
+        android:layout_alignStart="@+id/editButton"
         android:layout_below="@+id/editMessage"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="71dp"
         android:entries="@array/priority_array" />
 
@@ -30,9 +31,20 @@
         android:id="@+id/editButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/editPriority"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="216dp"
+        android:layout_marginTop="68dp"
         android:text="Confirm Change" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="54dp"
+        android:text="Edit An Existing Task"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>
