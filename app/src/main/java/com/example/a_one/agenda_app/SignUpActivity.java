@@ -25,7 +25,6 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        // Initialize FirebaseAuth
         firebaseAuthentication = FirebaseAuth.getInstance();
 
         passwordEditText = (EditText)findViewById(R.id.passwordInputField);
@@ -55,6 +54,7 @@ public class SignUpActivity extends AppCompatActivity {
                                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        MainActivity.shouldExecuteOnResume = true;
                                         startActivity(intent);
                                     } else {
                                         // Something went wrong, display the error message from firebase.
